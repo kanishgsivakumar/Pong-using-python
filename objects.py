@@ -28,7 +28,8 @@ class Ball(pygame.sprite.Sprite):
     def hit(self):
         self.hits += 1
         self.speed_up = 1.0+self.hits/10
-
+        pygame.mixer.music.load("res/smb_fireball.wav")
+        pygame.mixer.music.play(0)
     @property
     def position(self):
         return (self.rect.x, self.rect.y)
@@ -92,16 +93,20 @@ class Ball(pygame.sprite.Sprite):
 
     def get_x_val(self):
         return self.rect.x
+    def get_y_val(self):
+        return self.rect.y
+
 
 class Racket(pygame.sprite.Sprite):
 
-    def __init__(self, screen, width, height, side):
+    def __init__(self, screen, width, height, side,Ai = False):
         super().__init__()
 
         self.width, self.height = width, height
         self.racket_height = 100
         self.movement_speed = 20
         offset = 20
+        self.sound = 0
         self.screen = screen
         self.image = pygame.Surface([10, self.racket_height])
         self.image.fill(WHITE)
@@ -129,13 +134,16 @@ class Racket(pygame.sprite.Sprite):
     def move_up(self):
         if self.position[1] > 0:
             self.position = (self.position[0], self.position[1] - self.movement_speed)
-
+            pygame.mixer.music.load("res/smb_kick.wav")
+            pygame.mixer.music.play(0)
     def move_down(self):
         if self.position[1] + self.racket_height < self.height:
             self.position = (self.position[0], self.position[1] + self.movement_speed)
-
-
-
+            pygame.mixer.music.load("res/smb_kick.wav")
+            pygame.mixer.music.play(0)
+    def get_y_val(self):
+        return self.rect.y
+        
 class Directions(Enum):
     UP_LEFT = 7
     UP_RIGHT = 9

@@ -3,23 +3,48 @@ from objects import *
 
 clock = pygame.time.Clock()
 # variables
-WIN_WIDTH = 800
-WIN_HEIGHT = 640
+WIN_WIDTH = 802
+WIN_HEIGHT = 533
 MAX_SCORE = 5
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(DISPLAY, 0, 32)
-bg = pygame.image.load("res/bg.jpg")
+bg = pygame.image.load("res/bg.png")
+bg_i =pygame.image.load("res/bg_i.png")
+font = pygame.font.Font("res\digital-7.ttf",50)
+start = font.render("Start",True,WHITE)
+font_s = pygame.font.Font("res\digital-7.ttf",15)
+f1 = font_s.render("Press F1 for Single player",True,pygame.Color(32,178,170))
+f2 = font_s.render("Press F2 for Multi player",True,pygame.Color(32,178,170))
 DONE = False
 pause = False
 FPS = 30
-left_player = Player(Directions.LEFT, 'Left')
-right_player = Player(Directions.RIGHT, 'Right')
-
+withAi = False
+screen.blit(bg_i,(0,0))
+screen.blit(f1,((WIN_WIDTH-start.get_width())/2,WIN_HEIGHT/2))
+pygame.display.flip()
+running = True
+while (running):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # Set the x, y postions of the mouse click
+            x, y = event.pos
+            if start.get_rect().collidepoint(x, y):
+                print('clicked on image')
+    
+if withAi:
+    left_player = Player(Directions.LEFT, 'COMP')
+    right_player = Player(Directions.RIGHT, 'USER')
+else:
+    left_player = Player(Directions.LEFT, 'Left')
+    right_player = Player(Directions.RIGHT, 'Right')
+    
 curr_ball = Ball(screen, WIN_WIDTH, WIN_HEIGHT)
 
-left_racket = Racket(screen, WIN_WIDTH, WIN_HEIGHT, Directions.LEFT)
+left_racket = Racket(screen, WIN_WIDTH, WIN_HEIGHT, Directions.LEFT,withAi)
 right_racket = Racket(screen, WIN_WIDTH, WIN_HEIGHT, Directions.RIGHT)
 
 rackets = pygame.sprite.Group()
@@ -35,13 +60,12 @@ def game_paused(screen,left_player,right_player):
     pygame.draw.rect(gray_overlay,BLACK,[0,0,WIN_WIDTH,WIN_HEIGHT])
     gray_overlay.set_alpha(99)
     screen.blit(gray_overlay,(0,0))
-    font = pygame.font.SysFont(None,100)
     game_paused =font.render(" Game Paused",True,WHITE)
     w,h = game_paused.get_size()
     screen.blit(game_paused,(WIN_WIDTH/2-w/2,WIN_HEIGHT/2-h/2))
     scoreline = font.render(
         '{} - {}'.format(left_player.score, right_player.score), True, WHITE)
-    screen.blit(scoreline, (WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 + 100))
+    screen.blit(scoreline, (WIN_WIDTH / 2 - scoreline.get_width()/2, WIN_HEIGHT / 2 + scoreline.get_height()))
     pygame.display.update()
     
 
@@ -53,12 +77,11 @@ def game_over(screen, winner, left_paper, right_player):
     pygame.draw.rect(gray_overlay, BLACK, [0, 0, WIN_WIDTH, WIN_HEIGHT])
     gray_overlay.set_alpha(99)
     screen.blit(gray_overlay, (0, 0))
-    font = pygame.font.SysFont(None, 100)
-    game_over = font.render('{} Player WINS!'.format(winner.name), True, WHITE)
-    screen.blit(game_over, (WIN_WIDTH / 2 - 300, WIN_HEIGHT / 2 - 100))
+    game_over = font.render('{} Won !'.format(winner.name), True, WHITE)
+    screen.blit(game_over, (WIN_WIDTH / 2 - game_over.get_width()/2, WIN_HEIGHT / 2 - 100))
     scoreline = font.render(
         '{} - {}'.format(left_player.score, right_player.score), True, WHITE)
-    screen.blit(scoreline, (WIN_WIDTH / 2 - 50, WIN_HEIGHT / 2 + 100))
+    screen.blit(scoreline,(WIN_WIDTH/2 - scoreline.get_width()/2,WIN_HEIGHT/2 + scoreline.get_height(),))
     pygame.display.update()
     pygame.time.delay(2000)
 
@@ -71,6 +94,8 @@ while (not DONE)  :
     if(pause):
         game_paused(screen,left_player,right_player)
         if keys[pygame.K_F8]:
+            pygame.mixer.music.load("res/smb_pause.wav")
+            pygame.mixer.music.play()
             pause = False
         
     else:
@@ -82,11 +107,21 @@ while (not DONE)  :
             right_racket.move_up()
         if keys[pygame.K_DOWN]:
             right_racket.move_down()
-        if keys[pygame.K_w]:
-            left_racket.move_up()
-        if keys[pygame.K_s]:
-            left_racket.move_down()
+        if not withAi:
+            if keys[pygame.K_w]:
+                left_racket.move_up()
+            if keys[pygame.K_s]:
+                left_racket.move_down()
+        else:
+            if (curr_ball.get_y_val() < left_racket.get_y_val())and(curr_ball.get_x_val()<WIN_WIDTH/2):
+                left_racket.move_up()
+            elif (curr_ball.get_y_val() > left_racket.get_y_val())and(curr_ball.get_x_val()<WIN_WIDTH/2):
+                left_racket.move_down()
+            else:
+                pass
         if keys[pygame.K_F7 ]:
+            pygame.mixer.music.load("res/smb_pause.wav")
+            pygame.mixer.music.play()
             pause = True
         stuff_to_draw.update()
         curr_ball.update()
@@ -104,7 +139,7 @@ while (not DONE)  :
             curr_ball = Ball(screen, WIN_WIDTH, WIN_HEIGHT)
 
         # Print scores
-        font = pygame.font.SysFont('Helvetica', 25)
+        font = pygame.font.Font("res\digital-7.ttf", 25)
 
         left_player_score = font.render(
             '{}'.format(left_player.score), True, (255, 255, 255))
