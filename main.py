@@ -25,16 +25,12 @@ screen.blit(bg_i,(0,0))
 screen.blit(f1,((WIN_WIDTH-start.get_width())/2,WIN_HEIGHT/2))
 pygame.display.flip()
 running = True
-while (running):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            # Set the x, y postions of the mouse click
-            x, y = event.pos
-            if start.get_rect().collidepoint(x, y):
-                print('clicked on image')
-    
+
+
+
+
+
+
 if withAi:
     left_player = Player(Directions.LEFT, 'COMP')
     right_player = Player(Directions.RIGHT, 'USER')
