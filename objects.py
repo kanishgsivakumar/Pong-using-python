@@ -134,8 +134,7 @@ class Racket(pygame.sprite.Sprite):
     def move_up(self):
         if self.position[1] > 0:
             self.position = (self.position[0], self.position[1] - self.movement_speed)
-            pygame.mixer.music.load("res/smb_kick.wav")
-            pygame.mixer.music.play(0)
+
     def move_down(self):
         if self.position[1] + self.racket_height < self.height:
             self.position = (self.position[0], self.position[1] + self.movement_speed)
