@@ -1,47 +1,48 @@
-import pygame as pg 
+import pygame as pygame 
+from constants import *
 from objects import *
 
-clock = pg.time.Clock()
+clock = pygame.time.Clock()
 # variables
-WIN_WIDTH = 802
-WIN_HEIGHT = 533
-MAX_SCORE = 5
 DONE = False
 pause = False
-FPS = 30
+loading = False
 withAi = False
+god_mode = False
 welcome_screen = True
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
-pg.init()
-clock = pg.time.Clock()
-screen = pg.display.set_mode(DISPLAY, 0, 32)
-bg = pg.image.load("res/bg.png")
-bg_i =pg.image.load("res/bg_i.png")
-font = pg.font.Font("res\digital-7.ttf",100)
-start = font.render("Start",True,WHITE)
-font_s = pg.font.Font("res\digital-7.ttf",35)
-f1 = font_s.render("  Press F1 for Single player",True,pg.Color(127,255,0))
-f2 = font_s.render("  Press F2 for Multi player",True,pg.Color(127,255,0))
+pygame.init()
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode(DISPLAY, 0, 32)
+
+
+f1 = font_s.render("  Press F1 for Single player",True,pygame.Color(127,255,0))
+f2 = font_s.render("  Press F2 for Multi player",True,pygame.Color(127,255,0))
 screen.blit(bg_i,(0,0))
 screen.blit(f1,((WIN_WIDTH-f1.get_width())/2,WIN_HEIGHT/2))
 screen.blit(f2,((WIN_WIDTH-f2.get_width())/2,WIN_HEIGHT/2+50))
-pg.display.flip()
+pygame.display.flip()
 while welcome_screen:
-    keys = pg.key.get_pressed()
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
+    keys = pygame.key.get_pressed()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             welcome_screen = False
             DONE = True
 
     else:
-        pg.event.pump()
-        if keys[pg.K_F1]:
+        pygame.event.pump()
+        if keys[pygame.K_F1]:
             withAi= True
             welcome_screen = False
-        if keys[pg.K_F2]:
+        if keys[pygame.K_F2]:
             withAi = False
             welcome_screen = False
+        if keys[pygame.K_F3]:
+            withAi = False
+            god_mode = True
+            welcome_screen = False
 
+loading_screen(screen)
 if withAi:
     left_player = Player(Directions.LEFT, 'COMP')
     right_player = Player(Directions.RIGHT, 'USER')
@@ -54,74 +55,49 @@ curr_ball = Ball(screen, WIN_WIDTH, WIN_HEIGHT)
 left_racket = Racket(screen, WIN_WIDTH, WIN_HEIGHT, Directions.LEFT,withAi)
 right_racket = Racket(screen, WIN_WIDTH, WIN_HEIGHT, Directions.RIGHT)
 
-rackets = pg.sprite.Group()
+rackets = pygame.sprite.Group()
 rackets.add(left_racket)
 rackets.add(right_racket)
-stuff_to_draw = pg.sprite.Group()
+stuff_to_draw = pygame.sprite.Group()
 stuff_to_draw.add(left_racket)
 stuff_to_draw.add(right_racket)
-def game_paused(screen,left_player,right_player):
-    gray_overlay = pg.Surface((WIN_WIDTH,WIN_HEIGHT))
-    gray_overlay.fill(GRAY)
-    gray_overlay.set_colorkey(GRAY)
-    pg.draw.rect(gray_overlay,BLACK,[0,0,WIN_WIDTH,WIN_HEIGHT])
-    gray_overlay.set_alpha(99)
-    screen.blit(gray_overlay,(0,0))
-    game_paused =font.render(" Game Paused",True,WHITE)
-    w,h = game_paused.get_size()
-    screen.blit(game_paused,(WIN_WIDTH/2-w/2,WIN_HEIGHT/2-h/2))
-    scoreline = font.render(
-        '{} - {}'.format(left_player.score, right_player.score), True, WHITE)
-    screen.blit(scoreline, (WIN_WIDTH / 2 - scoreline.get_width()/2, WIN_HEIGHT / 2 + scoreline.get_height()))
-    pg.display.update()
-    
 
 
-def game_over(screen, winner, left_paper, right_player):
-    gray_overlay = pg.Surface((WIN_WIDTH, WIN_HEIGHT))
-    gray_overlay.fill(GRAY)
-    gray_overlay.set_colorkey(GRAY)
-    pg.draw.rect(gray_overlay, BLACK, [0, 0, WIN_WIDTH, WIN_HEIGHT])
-    gray_overlay.set_alpha(99)
-    screen.blit(gray_overlay, (0, 0))
-    game_over = font.render('{} Won !'.format(winner.name), True, WHITE)
-    screen.blit(game_over, (WIN_WIDTH / 2 - game_over.get_width()/2, WIN_HEIGHT / 2 - 100))
-    scoreline = font.render(
-        '{} - {}'.format(left_player.score, right_player.score), True, WHITE)
-    screen.blit(scoreline,(WIN_WIDTH/2 - scoreline.get_width()/2,WIN_HEIGHT/2 + scoreline.get_height(),))
-    pg.display.update()
-    pg.time.delay(2000)
 
 while (not DONE)  :
-    keys = pg.key.get_pressed()
+    keys = pygame.key.get_pressed()
     screen.blit(bg,(0,0))
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             DONE = True
     if(pause):
-        game_paused(screen,left_player,right_player)
-        if keys[pg.K_F8]:
-            pg.mixer.music.load("res/smb_pause.wav")
-            pg.mixer.music.play()
+        game_paused(screen,left_player.score,right_player.score)
+        if keys[pygame.K_F8]:
+            pygame.mixer.music.load("res/smb_pause.wav")
+            pygame.mixer.music.play()
             pause = False
         
     else:
-        pg.event.pump()
+        pygame.event.pump()
         
-        if keys[pg.K_ESCAPE]:
+        if keys[pygame.K_ESCAPE]:
             DONE = True
-        if keys[pg.K_UP]:
+        if keys[pygame.K_UP]:
             right_racket.move_up()
-            pg.mixer.music.load("res/smb_kick.wav")
-            pg.mixer.music.play()
-        if keys[pg.K_DOWN]:
-            pg.mixer.music.load("res/smb_kick.wav")
-            pg.mixer.music.play()
+            pygame.mixer.music.load("res/smb_kick.wav")
+            pygame.mixer.music.play()
+        if keys[pygame.K_DOWN]:
+            pygame.mixer.music.load("res/smb_kick.wav")
+            pygame.mixer.music.play()
             right_racket.move_down()
-        if not withAi:
-            if keys[pg.K_w]:
+        if not (withAi or god_mode):
+            if keys[pygame.K_w]:
+                pygame.mixer.music.load("res/smb_kick.wav")
+                pygame.mixer.music.play()
                 left_racket.move_up()
-            if keys[pg.K_s]:
+            if keys[pygame.K_s]:
+                pygame.mixer.music.load("res/smb_kick.wav")
+                pygame.mixer.music.play()
                 left_racket.move_down()
         else:
             if (curr_ball.get_y_val() < left_racket.get_y_val())and(curr_ball.get_x_val()<WIN_WIDTH/2):
@@ -130,9 +106,9 @@ while (not DONE)  :
                 left_racket.move_down()
             else:
                 pass
-        if keys[pg.K_F7 ]:
-            pg.mixer.music.load("res/smb_pause.wav")
-            pg.mixer.music.play()
+        if keys[pygame.K_F7 ]:
+            pygame.mixer.music.load("res/smb_pause.wav")
+            pygame.mixer.music.play()
             pause = True
         stuff_to_draw.update()
         curr_ball.update()
@@ -150,43 +126,43 @@ while (not DONE)  :
             curr_ball = Ball(screen, WIN_WIDTH, WIN_HEIGHT)
 
         # Print scores
-        font = pg.font.Font("res\digital-7.ttf", 100)
+        font = pygame.font.Font("res\digital-7.ttf", 100)
 
-        left_player_score = font.render(
-            '{}'.format(left_player.score), True, (255, 255, 255))
-        right_player_score = font.render(
-            '{}'.format(right_player.score), True, (255, 255, 255))
+        left_score = font.render(
+            '{}'.format(left_player.score), True, (0, 0, 255))
+        right_score = font.render(
+            '{}'.format(right_player.score), True, (255, 0, 0))
         goal_text = font.render(
-            '{}'.format(MAX_SCORE), True, (255, 255, 0))
+            '{}'.format(MAX_SCORE), True,pygame.Color(127,255,0))
 
-        screen.blit(left_player_score, (WIN_WIDTH / 2 - 100, 10))
-        screen.blit(right_player_score, (WIN_WIDTH / 2 + 100, 10))
-        screen.blit(goal_text, (WIN_WIDTH / 2, 0))
+        screen.blit(left_score, ( 100-left_score.get_width()/2, 10))
+        screen.blit(right_score, (WIN_WIDTH - 100 -right_score.get_width()/2, 10))
+        screen.blit(goal_text, ((WIN_WIDTH-goal_text.get_width())/2, 0))
 
         stuff_to_draw.draw(screen)
         curr_ball.draw(screen)
 
         if left_player.score >= MAX_SCORE:
             if withAi:
-                pg.mixer.music.load("res\smb_gameover.wav")
-                pg.mixer.music.play()
+                pygame.mixer.music.load("res\smb_gameover.wav")
+                pygame.mixer.music.play()
             else:
-                pg.mixer.music.load("res\smb_stage_clear.wav")
-                pg.mixer.music.play()
+                pygame.mixer.music.load("res\smb_stage_clear.wav")
+                pygame.mixer.music.play()
 
-            game_over(screen, left_player, left_player, right_player)
+            game_over(screen, left_player.name, left_player.score,right_player.score)
         elif right_player.score >= MAX_SCORE:
-            pg.mixer.music.pygame.music.load("res\smb_stage_clear.wav")
-            pg.mixer.music.pygame.music.play()
-            game_over(screen, right_player, left_player, right_player)
+            pygame.mixer.music.load("res\smb_stage_clear.wav")
+            pygame.mixer.music.play()
+            game_over(screen, right_player.name, left_player.score, right_player.score)
         if left_player.score >= MAX_SCORE or right_player.score >= MAX_SCORE:
             DONE = True
 
-        pg.display.set_caption('Pong')
+        pygame.display.set_caption('Pong')
 
-        pg.display.flip()
+        pygame.display.flip()
         clock.tick(FPS)
     
         
 
-pg.quit()
+pygame.quit()
